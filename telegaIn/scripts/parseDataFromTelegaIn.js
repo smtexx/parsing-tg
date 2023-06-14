@@ -12,7 +12,7 @@ export async function getDataFromTelegaIn(link, PAGE) {
   const $ = load(await PAGE.content());
 
   const data = {
-    telegaInLink: link,
+    id: link.match(/(?<=https:\/\/telega\.in\/channels\/)[^\/]+(?=\/card)/)[0],
   };
 
   // Parse About block
