@@ -16,7 +16,7 @@ import { ParsingError } from '../common/ParsingError.js';
   link - ссылка на отфильтрованную по теме страницу
 */
 
-export async function parser_catalogPage(PAGE) {
+export async function parser_catalogPage(link, PAGE) {
   const URL = 'https://telega.in/catalog';
   const data = [];
 
