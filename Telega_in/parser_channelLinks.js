@@ -5,7 +5,7 @@ import { ParsingError } from '../common/ParsingError.js';
  * телеграм каналов на telega.in/catalog. Возвращает массив извлеченных ссылок
  *
  * @param {string} catalogPage - ссылка на страницу каталога с фильтрами
- * @param {import('playwright').Page} PAGE - объект страницы браузера из пакета playwright
+ * @param {import('playwright').Page} PAGE - объект страницы браузера с ПРОЙДЕННОЙ АВТОРИЗАЦИЕЙ из пакета playwright
  */
 
 export async function parser_cannelLinks(catalogPage, PAGE) {
