@@ -9,7 +9,7 @@ import * as path from 'path';
  *
  * @param {string} name - имя нового файла без расширения
  * @param {string} dest - путь к директории для записи файла
- * @param {string} data - объект данных для записи в файл
+ * @param {object} data - объект данных для записи в файл
  */
 
 export async function writeJSON(name, dest, data) {
@@ -35,5 +35,3 @@ export async function writeJSON(name, dest, data) {
   await fs.writeFile(path.join(dest, fileName), JSON.stringify(data));
   console.log(`Файл ${fileName} успешно записан в ${dest}`);
 }
-
-writeJSON('data', 'parsed_data', { hello: 'Hello!' });
