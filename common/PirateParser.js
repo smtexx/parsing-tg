@@ -1,25 +1,51 @@
 import { chromium } from 'playwright';
 
+/**
+ * Класс парсера данных. Последовательность запуска:
+ *  1. Создать объект парсера: new PirateParser(config)
+ *  2. Наполнить стек ссылками parser.fillStack(links)
+ *  3. Инициализировать парсер: await parser.init()
+ *  4. Запустить парсинг данных: await parser.parse()
+ *
+ */
+
 export default class PirateParser {
   #stack = [];
   #parsedData = [];
   #parsingFn;
   #authFn;
-  #onCompleted;
+  #saveDataFn;
   #streams;
   #BROWSER;
   #startTime;
   #stackLength;
+  #errorHandleFn;
+  #errorStack = [];
 
-  constructor(parsingFn, onCompleted, streams = 1, authFn) {
-    if (!parsingFn || !onCompleted || !streams) {
+  /**
+   * Создать экземпляр парсера
+   *
+   * @typedef {import('playwright').Page} PAGE *
+   * @typedef {Object} Config
+   * @property {(item: string, PAGE: PAGE) => Promise<any>} parsingFn - функция для парсинга данных
+   * @property {(data: any[]) => Promise<undefined>} saveDataFn - функция для обработки данных, полученными в ходе парсинга
+   * @property {(PAGE: PAGE) => Promise<PAGE>} authFn - функция авторизации в ходе парсинга
+   * @property {(errors: any[]) => Promise<undefined>} errorHandleFn - функция для обработки ошибок, возникших при парсинге
+   * @property {number} streams - количество паралельных потоков парсинга
+   *
+   * @param {Config} config - объект конфигурации создаваемого парсера
+   *
+   */
+  constructor({ parsingFn, saveDataFn, authFn, errorHandleFn, streams }) {
+    if (!parsingFn || !saveDataFn) {
       throw new PirateParserError('Unable to create parser without argument');
     }
 
     this.#parsingFn = parsingFn;
+    this.#saveDataFn = saveDataFn;
     this.#authFn = authFn;
-    this.#onCompleted = onCompleted;
-    this.#streams = streams;
+    this.#errorHandleFn = errorHandleFn;
+    this.#streams = streams || 1;
 
     console.log('');
     console.log('');
@@ -44,6 +70,7 @@ export default class PirateParser {
       try {
         dataPart = await this.#parsingFn(item, PAGE);
       } catch (error) {
+        this.#errorStack.push(item);
         console.log(`PirateParser: ${error.message}`);
       }
 
@@ -51,7 +78,7 @@ export default class PirateParser {
 
       if (this.#stack.length !== 0) {
         console.log(
-          `PirateParser: ссылок в очереди ${
+          `PirateParser: ссылок в очереди: ${
             this.#stack.length
           }, примерно осталось минут: ${
             Math.round(
@@ -99,6 +126,9 @@ export default class PirateParser {
     this.#startTime = Date.now();
 
     // Start streams
+    console.log(
+      `PirateParser: количество парралельных потоков парсинга: ${this.#streams}`
+    );
     await Promise.all(
       Array(this.#streams)
         .fill(null)
@@ -113,7 +143,12 @@ export default class PirateParser {
       this.#parsedData = this.#parsedData.flat();
     }
 
-    await this.#onCompleted(this.#parsedData);
+    // Run error handler, if #errorStack has records
+    if (this.#errorStack.length !== 0) {
+      await this.#errorHandleFn(this.#errorStack);
+    }
+
+    await this.#saveDataFn(this.#parsedData);
     console.log(
       `PirateParser: средняя скорость парсинга: ${
         Math.round((Date.now() - this.#startTime) / this.#stackLength / 10) /
