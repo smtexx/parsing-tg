@@ -13,8 +13,13 @@ import * as path from 'path';
  */
 
 export async function writeJSON(name, dest, data) {
-  let fileName = `${name}.json`;
-  console.log(`Запись файла ${fileName} в ${dest}`);
+  const extention = '.json';
+  const baseName = name.endsWith(extention)
+    ? name.replace(extention, '')
+    : name;
+  let fullName = baseName + extention;
+
+  console.log(`Запись файла ${fullName} в ${dest}`);
 
   let dir = [];
   try {
@@ -25,13 +30,13 @@ export async function writeJSON(name, dest, data) {
     await fs.mkdir(dest);
   }
 
-  if (dir.includes(fileName)) {
-    console.log(`Файл ${fileName} уже существует в ${dest}`);
-    fileName = `${name}_${randomUUID().slice(0, 8)}.json`;
-    console.log(`Файл будет сохранен как ${fileName}`);
+  if (dir.includes(fullName)) {
+    console.log(`Файл ${fullName} уже существует в ${dest}`);
+    fullName = `${baseName}_${randomUUID().slice(0, 8)}.json`;
+    console.log(`Файл будет сохранен как ${fullName}`);
   }
 
   console.log('Запись файла...');
-  await fs.writeFile(path.join(dest, fileName), JSON.stringify(data));
-  console.log(`Файл ${fileName} успешно записан в ${dest}`);
+  await fs.writeFile(path.join(dest, fullName), JSON.stringify(data));
+  console.log(`Файл ${fullName} успешно записан в ${dest}`);
 }
