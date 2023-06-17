@@ -53,9 +53,13 @@ export default class PirateParser {
         console.log(
           `PirateParser: ссылок в очереди ${
             this.#stack.length
-          }, осталось около ${
-            ((Date.now() - startTime) * this.#stack.length) / 60_000
-          } минут`
+          }, примерно осталось минут: ${
+            Math.round(
+              ((Date.now() - startTime) * this.#stack.length) /
+                this.#streams /
+                6000
+            ) / 10
+          }`
         );
       }
     }
@@ -112,7 +116,8 @@ export default class PirateParser {
     await this.#onCompleted(this.#parsedData);
     console.log(
       `PirateParser: средняя скорость парсинга: ${
-        (Date.now() - this.#startTime) / this.#stackLength / 1000
+        Math.round((Date.now() - this.#startTime) / this.#stackLength / 10) /
+        100
       } секунд`
     );
     console.log('X-X-X-X-X-X-X-X   Встать на якорь!   X-X-X-X-X-X-X-X');
