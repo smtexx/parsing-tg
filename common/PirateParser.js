@@ -24,7 +24,7 @@ export default class PirateParser {
     console.log('');
     console.log('');
     console.log('');
-    console.log('☠-☠-☠-☠-☠-☠-☠-☠   PirateParser       ☠-☠-☠-☠-☠-☠-☠-☠');
+    console.log('X-X-X-X-X-X-X-X   PirateParser       X-X-X-X-X-X-X-X');
   }
 
   async #startStream() {
@@ -36,6 +36,8 @@ export default class PirateParser {
     }
 
     while (this.#stack.length !== 0) {
+      const startTime = Date.now();
+
       const item = this.#stack.pop();
       let dataPart;
 
@@ -46,7 +48,16 @@ export default class PirateParser {
       }
 
       this.#parsedData.push(dataPart);
-      console.log(`PirateParser: осталось ссылок - ${this.#stack.length}`);
+
+      if (this.#stack.length !== 0) {
+        console.log(
+          `PirateParser: ссылок в очереди ${
+            this.#stack.length
+          }, осталось около ${
+            ((Date.now() - startTime) * this.#stack.length) / 60_000
+          } минут`
+        );
+      }
     }
 
     await PAGE.close();
@@ -80,7 +91,7 @@ export default class PirateParser {
     }
 
     // Start parsing
-    console.log('☠-☠-☠-☠-☠-☠-☠-☠   Поднять паруса!    ☠-☠-☠-☠-☠-☠-☠-☠');
+    console.log('X-X-X-X-X-X-X-X   Поднять паруса!    X-X-X-X-X-X-X-X');
     this.#startTime = Date.now();
 
     // Start streams
@@ -104,7 +115,7 @@ export default class PirateParser {
         (Date.now() - this.#startTime) / this.#stackLength / 1000
       } секунд`
     );
-    console.log('☠-☠-☠-☠-☠-☠-☠-☠   Встать на якорь!   ☠-☠-☠-☠-☠-☠-☠-☠');
+    console.log('X-X-X-X-X-X-X-X   Встать на якорь!   X-X-X-X-X-X-X-X');
   }
 }
 
