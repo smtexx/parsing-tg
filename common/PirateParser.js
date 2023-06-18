@@ -134,11 +134,13 @@ export default class PirateParser {
    */
   async init() {
     // Выбор типа запускаемого браузера - с головой или без
-    if (this.#headless) {
-      this.#BROWSER = await firefox.launch();
-    } else {
-      this.#BROWSER = await firefox.launch({ headless: false });
-    }
+    let BROWSER = this.#headless
+      ? await firefox.launch()
+      : await firefox.launch({ headless: false });
+
+    this.#BROWSER = await BROWSER.newContext({
+      locale: 'ru-RU',
+    });
   }
 
   /**
