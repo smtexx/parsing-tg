@@ -1,6 +1,11 @@
 import { load } from 'cheerio';
 import { parseNumericValue } from '../common/parseNumericValue.js';
 import { ParsingError } from '../common/ParsingError.js';
+import {
+  INJECTED_SELECTOR,
+  INJECTED_SELECTOR_ATTRIBUTE,
+  injectMarker,
+} from '../common/injectMarker.js';
 
 /**
  * Парсер извлекает данные из https://tgstat.ru/channel/@${channelID}/stat.
@@ -44,39 +49,39 @@ export async function parser_commonStat(channelID, PAGE) {
   const URL = `https://tgstat.ru/channel/@${channelID}/stat`;
   const data = { channelID };
 
-  const response = await PAGE.goto(URL);
-
-  if (!response.ok()) {
-    throw new ParsingError(`Unable to open @${channelID}`);
-  }
-
+  // Переходим к странице и дожидаемся конца загрузки
+  await PAGE.goto(URL);
   await PAGE.waitForLoadState('load');
 
-  // Функция проверки необходимости авторизации
-  await PAGE.waitForFunction(
-    () => {
-      const authLink = document.querySelector(
-        'a[data-src="/login?redirect_uri="]'
-      );
-      const dataSelector = document.querySelector('.card.card-body h2');
+  // Маркируем страницу
+  const CONTENT = 'content';
+  const NOT_FOUND = 'not_found';
+  const markers = [
+    // Страница содержит контент для парсинга
+    { selector: '.modal.show', text: 'Канал не найден', value: NOT_FOUND },
+    { selector: '.card.card-body h2', value: CONTENT },
+  ];
+  await PAGE.waitForFunction(injectMarker, markers, { timeout: 0 });
 
-      if (authLink === null && dataSelector !== null) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-    null,
-    { timeout: 0 }
-  );
-
+  // Определяем маркер
   const $ = load(await PAGE.content());
+  const marker = $(INJECTED_SELECTOR).attr(INJECTED_SELECTOR_ATTRIBUTE);
+
+  // Если канала не найден выбрасываем исключение
+  if (marker === NOT_FOUND) {
+    throw new ParsingError(`!!!!! Канал @${channelID} не найден на TGstat.ru`);
+  }
+
   const baseSelector = '.card.card-body';
 
   // Блок подписчиков
-  const subscribersBlock = $(
+  let subscribersBlock = $(
     baseSelector + ' div:contains("подписчики")'
   ).parent();
+
+  if (subscribersBlock.length === 0) {
+    subscribersBlock = $(baseSelector + ' div:contains("участники")').parent();
+  }
 
   data.subscribers = parseNumericValue(subscribersBlock.find('h2').text());
   data.subscribersDaily_trend = subscribersBlock
@@ -154,9 +159,11 @@ export async function parser_commonStat(channelID, PAGE) {
     .trim();
 
   // Блок статистики публикаций
-  const postCountBlock = $(
-    baseSelector + ' div:contains("публикации")'
-  ).parent();
+  let postCountBlock = $(baseSelector + ' div:contains("публикации")').parent();
+
+  if (postCountBlock.length === 0) {
+    postCountBlock = $(baseSelector + ' div:contains("сообщения")').parent();
+  }
 
   data.totalPosts = parseNumericValue(
     postCountBlock.find('h2:contains("всего")').text()
@@ -190,9 +197,13 @@ export async function parser_commonStat(channelID, PAGE) {
   );
 
   // Блок распределения полов подписчиков
-  const genderBlock = $(
+  let genderBlock = $(
     baseSelector + ' div:contains("пол подписчиков")'
   ).parent();
+
+  if (genderBlock.length === 0) {
+    genderBlock = $(baseSelector + ' div:contains("пол участников")').parent();
+  }
 
   data.male_percent = parseNumericValue(
     genderBlock.find('span:contains("мужчины")').prev().text()
