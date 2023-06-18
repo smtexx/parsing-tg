@@ -1,5 +1,6 @@
 import { load } from 'cheerio';
 import { parseNumericValue } from '../common/parseNumericValue.js';
+import { ParsingError } from '../common/ParsingError.js';
 
 /**
  * Парсер извлекает данные из https://tgstat.ru/channel/@${channelID}/stat.
@@ -41,20 +42,33 @@ import { parseNumericValue } from '../common/parseNumericValue.js';
 
 export async function parser_commonStat(channelID, PAGE) {
   const URL = `https://tgstat.ru/channel/@${channelID}/stat`;
-  const data = {};
+  const data = { channelID };
 
-  console.log(`Поиск страницы канала @${channelID} на TGstat.ru`);
   const response = await PAGE.goto(URL);
 
   if (!response.ok()) {
-    console.log(
-      `!_MINOR_PARSING_ERROR: канал @${channelID} отсутствует на TGstat.ru!`
-    );
-    return data;
+    throw new ParsingError(`Unable to open @${channelID}`);
   }
 
   await PAGE.waitForLoadState('load');
-  console.log('Страница канала загружена, начинаем парсинг данных');
+
+  // Функция проверки необходимости авторизации
+  await PAGE.waitForFunction(
+    () => {
+      const authLink = document.querySelector(
+        'a[data-src="/login?redirect_uri="]'
+      );
+      const dataSelector = document.querySelector('.card.card-body h2');
+
+      if (authLink === null && dataSelector !== null) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    null,
+    { timeout: 0 }
+  );
 
   const $ = load(await PAGE.content());
   const baseSelector = '.card.card-body';
@@ -127,7 +141,7 @@ export async function parser_commonStat(channelID, PAGE) {
   );
 
   // Блок возраста канала
-  const channelAgeBlock = $(baseSelector + ' div:contains("возраст канала")')
+  const channelAgeBlock = $(baseSelector + ' div:contains("возраст")')
     .parent()
     .parent();
 
@@ -187,6 +201,5 @@ export async function parser_commonStat(channelID, PAGE) {
     genderBlock.find('span:contains("женщины")').prev().text()
   );
 
-  console.log('Данные успешно извлечены :)');
   return data;
 }
