@@ -54,12 +54,18 @@ export async function parser_commonStat(channelID, PAGE) {
   await PAGE.waitForLoadState('load');
 
   // Маркируем страницу
-  const CONTENT = 'content';
+  const CHAT = 'chat';
+  const CHANNEL = 'channel';
   const NOT_FOUND = 'not_found';
   const markers = [
     // Страница содержит контент для парсинга
     { selector: '.modal.show', text: 'Канал не найден', value: NOT_FOUND },
-    { selector: '.card.card-body h2', value: CONTENT },
+    { selector: '.card.card-body h5', text: 'Гео и язык чата', value: CHAT },
+    {
+      selector: '.card.card-body h5',
+      text: 'Гео и язык канала',
+      value: CHANNEL,
+    },
   ];
   await PAGE.waitForFunction(injectMarker, markers, { timeout: 0 });
 
@@ -74,143 +80,238 @@ export async function parser_commonStat(channelID, PAGE) {
 
   const baseSelector = '.card.card-body';
 
-  // Блок подписчиков
-  let subscribersBlock = $(
-    baseSelector + ' div:contains("подписчики")'
-  ).parent();
+  // Парсинг канала
+  if (marker === CHANNEL) {
+    // Блок подписчиков
+    const subscribersBlock = $(
+      baseSelector + ' div:contains("подписчики")'
+    ).parent();
 
-  if (subscribersBlock.length === 0) {
-    subscribersBlock = $(baseSelector + ' div:contains("участники")').parent();
+    data.subscribers = parseNumericValue(subscribersBlock.find('h2').text());
+    data.subscribersDaily_trend = subscribersBlock
+      .find('td:contains("сегодня")')
+      .prev()
+      .text()
+      .trim();
+    data.subscribersWeekly_trend = subscribersBlock
+      .find('td:contains("за неделю")')
+      .prev()
+      .text()
+      .trim();
+    data.subscribersMonthly_trend = subscribersBlock
+      .find('td:contains("за месяц")')
+      .prev()
+      .text()
+      .trim();
+
+    // Блок цитирования
+    const citationBlock = $(
+      baseSelector + ' div:contains("индекс цитирования")'
+    ).parent();
+
+    data.citationIndex = parseNumericValue(citationBlock.find('h2').text());
+    data.channelMentions = parseNumericValue(
+      citationBlock.find('td:contains("уп. каналов")').prev().text()
+    );
+    data.postMentions = parseNumericValue(
+      citationBlock.find('td:contains("упоминаний")').prev().text()
+    );
+    data.reposts = parseNumericValue(
+      citationBlock.find('td:contains("репостов")').prev().text()
+    );
+
+    // Блок охвата аудитории
+    const reachBlock = $(baseSelector + ' div:contains("средний охват")')
+      .parent()
+      .parent();
+
+    data.averagePostReach = parseNumericValue(reachBlock.find('h2').text());
+    data.err_percent = parseNumericValue(
+      reachBlock.find(' tr:first-of-type td:contains("ERR")').prev().text()
+    );
+    data.err24_percent = parseNumericValue(
+      reachBlock.find('td:contains("ERR24")').prev().text()
+    );
+
+    // Блок рекламного охвата аудитории
+    const adsReachBlock = $(baseSelector + ' div:contains("средний рекламный")')
+      .parent()
+      .parent();
+
+    data.averageAdsPostReach = parseNumericValue(
+      adsReachBlock.find('h2').text()
+    );
+    data.adsReach_12h = parseNumericValue(
+      adsReachBlock.find('td:contains("за 12 часов")').prev().text()
+    );
+    data.adsReach_24h = parseNumericValue(
+      adsReachBlock.find('td:contains("за 24 часа")').prev().text()
+    );
+    data.adsReach_48h = parseNumericValue(
+      adsReachBlock.find('td:contains("за 48 часов")').prev().text()
+    );
+
+    // Блок возраста канала
+    const channelAgeBlock = $(
+      baseSelector + ' div:contains("возраст канала")'
+    ).parent();
+
+    data.channelAge = channelAgeBlock.find('h2').text().trim();
+    data.channelCreated = channelAgeBlock
+      .find('span:contains("канал создан")')
+      .prev()
+      .prev()
+      .text()
+      .trim();
+
+    // Блок статистики публикаций
+    const postCountBlock = $(
+      baseSelector + ' div:contains("публикации")'
+    ).parent();
+
+    data.totalPosts = parseNumericValue(
+      postCountBlock.find('h2:contains("всего")').text()
+    );
+    data.postsPerDay = parseNumericValue(
+      postCountBlock.find('td:contains("вчера")').prev().text()
+    );
+    data.postsPerWeek = parseNumericValue(
+      postCountBlock.find('td:contains("за неделю")').prev().text()
+    );
+    data.postsPerMonth = parseNumericValue(
+      postCountBlock.find('td:contains("за месяц")').prev().text()
+    );
+
+    // Блок вовлеченности подписчиков
+    const involvementBlock = $(
+      baseSelector + ' div:contains("подписчиков (ER)")'
+    )
+      .parent()
+      .parent();
+
+    data.involvement_percent = parseNumericValue(
+      involvementBlock.find('h2').text()
+    );
+    data.subscribersRepost = parseNumericValue(
+      involvementBlock.find('td:contains("пересылки")').prev().text()
+    );
+    data.subscribersComment = parseNumericValue(
+      involvementBlock.find('td:contains("комментарии")').prev().text()
+    );
+    data.subscribersReact = parseNumericValue(
+      involvementBlock.find('td:contains("реакции")').prev().text()
+    );
+
+    // Блок распределения полов подписчиков
+    const genderBlock = $(
+      baseSelector + ' div:contains("пол подписчиков")'
+    ).parent();
+
+    data.male_percent = parseNumericValue(
+      genderBlock.find('span:contains("мужчины")').prev().text()
+    );
+    data.female_percent = parseNumericValue(
+      genderBlock.find('span:contains("женщины")').prev().text()
+    );
   }
 
-  data.subscribers = parseNumericValue(subscribersBlock.find('h2').text());
-  data.subscribersDaily_trend = subscribersBlock
-    .find('td:contains("сегодня")')
-    .prev()
-    .text()
-    .trim();
-  data.subscribersWeekly_trend = subscribersBlock
-    .find('td:contains("за неделю")')
-    .prev()
-    .text()
-    .trim();
-  data.subscribersMonthly_trend = subscribersBlock
-    .find('td:contains("за месяц")')
-    .prev()
-    .text()
-    .trim();
+  // Парсинг чата
+  if (marker === CHAT) {
+    // Блок подписчиков
+    const subscribersBlock = $(baseSelector + ' div:contains("участники")')
+      .first()
+      .parent();
 
-  // Блок цитирования
-  const citationBlock = $(
-    baseSelector + ' div:contains("индекс цитирования")'
-  ).parent();
+    data.subscribers = parseNumericValue(subscribersBlock.find('h2').text());
+    data.subscribersDaily_trend = subscribersBlock
+      .find('td:contains("сегодня")')
+      .prev()
+      .text()
+      .trim();
+    data.subscribersWeekly_trend = subscribersBlock
+      .find('td:contains("за неделю")')
+      .prev()
+      .text()
+      .trim();
+    data.subscribersMonthly_trend = subscribersBlock
+      .find('td:contains("за месяц")')
+      .prev()
+      .text()
+      .trim();
 
-  data.citationIndex = parseNumericValue(citationBlock.find('h2').text());
-  data.channelMentions = parseNumericValue(
-    citationBlock.find('td:contains("уп. каналов")').prev().text()
-  );
-  data.postMentions = parseNumericValue(
-    citationBlock.find('td:contains("упоминаний")').prev().text()
-  );
-  data.reposts = parseNumericValue(
-    citationBlock.find('td:contains("репостов")').prev().text()
-  );
+    // Блок активных участников
+    const membersBlock = $(
+      baseSelector + ' div:contains("активные участники")'
+    ).parent();
 
-  // Блок охвата аудитории
-  const reachBlock = $(baseSelector + ' div:contains("средний охват")')
-    .parent()
-    .parent();
+    data.uniqMembersWeek = parseNumericValue(membersBlock.find('h2').text());
+    data.uniqMembersDay = parseNumericValue(
+      membersBlock.find('td:contains("DAU")').prev().text()
+    );
+    data.uniqMembersMonth = parseNumericValue(
+      membersBlock.find('td:contains("MAU")').prev().text()
+    );
 
-  data.averagePostReach = parseNumericValue(reachBlock.find('h2').text());
-  data.err_percent = parseNumericValue(
-    reachBlock.find(' tr:first-of-type td:contains("ERR")').prev().text()
-  );
-  data.err24_percent = parseNumericValue(
-    reachBlock.find('td:contains("ERR24")').prev().text()
-  );
+    // Блок участников онлайн
+    const onlineBlock = $(
+      baseSelector + ' div:contains("участники онлайн")'
+    ).parent();
 
-  // Блок рекламного охвата аудитории
-  const adsReachBlock = $(baseSelector + ' div:contains("средний рекламный")')
-    .parent()
-    .parent();
+    data.onlineNow = parseNumericValue(onlineBlock.find('h2').text());
+    data.onlineDay = parseNumericValue(
+      onlineBlock.find('td:contains("днем")').prev().text()
+    );
+    data.onlineNight = parseNumericValue(
+      onlineBlock.find('td:contains("ночью")').prev().text()
+    );
 
-  data.averageAdsPostReach = parseNumericValue(adsReachBlock.find('h2').text());
-  data.adsReach_12h = parseNumericValue(
-    adsReachBlock.find('td:contains("за 12 часов")').prev().text()
-  );
-  data.adsReach_24h = parseNumericValue(
-    adsReachBlock.find('td:contains("за 24 часа")').prev().text()
-  );
-  data.adsReach_48h = parseNumericValue(
-    adsReachBlock.find('td:contains("за 48 часов")').prev().text()
-  );
+    // Блок возраста чата
+    const channelAgeBlock = $(
+      baseSelector + ' div:contains("возраст чата")'
+    ).parent();
 
-  // Блок возраста канала
-  const channelAgeBlock = $(baseSelector + ' div:contains("возраст")')
-    .parent()
-    .parent();
+    data.channelAge = channelAgeBlock.find('h2').text().trim();
+    data.channelCreated = channelAgeBlock
+      .find('span:contains("чат создан")')
+      .prev()
+      .prev()
+      .text()
+      .trim();
 
-  data.channelAge = channelAgeBlock.find('h2').text().trim();
-  data.channelCreated = channelAgeBlock
-    .find('span:contains("канал создан")')
-    .prev()
-    .prev()
-    .text()
-    .trim();
+    // Блок распределения полов подписчиков
+    const genderBlock = $(
+      baseSelector + ' div:contains("пол участников")'
+    ).parent();
 
-  // Блок статистики публикаций
-  let postCountBlock = $(baseSelector + ' div:contains("публикации")').parent();
+    data.male_percent = parseNumericValue(
+      genderBlock.find('span:contains("мужчины")').prev().text()
+    );
+    data.female_percent = parseNumericValue(
+      genderBlock.find('span:contains("женщины")').prev().text()
+    );
 
-  if (postCountBlock.length === 0) {
-    postCountBlock = $(baseSelector + ' div:contains("сообщения")').parent();
+    // Блок подписчиков
+    const messagesBlock = $(
+      baseSelector + ' div:contains("сообщения")'
+    ).parent();
+
+    data.totalMessages = parseNumericValue(messagesBlock.find('h2').text());
+    data.messagesDay = messagesBlock
+      .find('td:contains("вчера")')
+      .prev()
+      .text()
+      .trim();
+    data.messagesWeek = messagesBlock
+      .find('td:contains("за неделю")')
+      .prev()
+      .text()
+      .trim();
+    data.messagesMonth = messagesBlock
+      .find('td:contains("за месяц")')
+      .prev()
+      .text()
+      .trim();
   }
-
-  data.totalPosts = parseNumericValue(
-    postCountBlock.find('h2:contains("всего")').text()
-  );
-  data.postsPerDay = parseNumericValue(
-    postCountBlock.find('td:contains("вчера")').prev().text()
-  );
-  data.postsPerWeek = parseNumericValue(
-    postCountBlock.find('td:contains("за неделю")').prev().text()
-  );
-  data.postsPerMonth = parseNumericValue(
-    postCountBlock.find('td:contains("за месяц")').prev().text()
-  );
-
-  // Блок вовлеченности подписчиков
-  const involvementBlock = $(baseSelector + ' div:contains("подписчиков (ER)")')
-    .parent()
-    .parent();
-
-  data.involvement_percent = parseNumericValue(
-    involvementBlock.find('h2').text()
-  );
-  data.subscribersRepost = parseNumericValue(
-    involvementBlock.find('td:contains("пересылки")').prev().text()
-  );
-  data.subscribersComment = parseNumericValue(
-    involvementBlock.find('td:contains("комментарии")').prev().text()
-  );
-  data.subscribersReact = parseNumericValue(
-    involvementBlock.find('td:contains("реакции")').prev().text()
-  );
-
-  // Блок распределения полов подписчиков
-  let genderBlock = $(
-    baseSelector + ' div:contains("пол подписчиков")'
-  ).parent();
-
-  if (genderBlock.length === 0) {
-    genderBlock = $(baseSelector + ' div:contains("пол участников")').parent();
-  }
-
-  data.male_percent = parseNumericValue(
-    genderBlock.find('span:contains("мужчины")').prev().text()
-  );
-  data.female_percent = parseNumericValue(
-    genderBlock.find('span:contains("женщины")').prev().text()
-  );
 
   return data;
 }
