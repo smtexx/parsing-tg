@@ -65,13 +65,15 @@ export default class PirateParser {
     this.#streams = streams || 1;
     this.#headless = headless && true;
     this.#delay = delay || 0;
-    this.#averageQueue = new CurrentAverage(10);
+    this.#averageQueue = new CurrentAverage(15);
 
     console.log('');
     console.log('');
     console.log('');
     console.log(
-      '☠ ☠ ☠ ☠ ☠ ☠   PirateParser       ☠ ☠ ☠ ☠ ☠ ☠'.colorLog('yellow')
+      '☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠   PirateParser       ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠'.colorLog(
+        'yellow'
+      )
     );
   }
 
@@ -173,7 +175,9 @@ export default class PirateParser {
 
     // Начать парсинг
     console.log(
-      '☠ ☠ ☠ ☠ ☠ ☠   Поднять паруса!    ☠ ☠ ☠ ☠ ☠ ☠'.colorLog('yellow')
+      '☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠   Поднять паруса!    ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠'.colorLog(
+        'yellow'
+      )
     );
     this.#startTime = Date.now();
 
@@ -211,7 +215,9 @@ export default class PirateParser {
       } секунд`.colorLog('yellow')
     );
     console.log(
-      '☠ ☠ ☠ ☠ ☠ ☠   Встать на якорь!   ☠ ☠ ☠ ☠ ☠ ☠'.colorLog('yellow')
+      '☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠   Встать на якорь!   ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠ ☠'.colorLog(
+        'yellow'
+      )
     );
   }
 }
