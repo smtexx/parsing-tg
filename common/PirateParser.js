@@ -71,7 +71,7 @@ export default class PirateParser {
     console.log('');
     console.log('');
     console.log(
-      'X-X-X-X-X-X-X-X   PirateParser       X-X-X-X-X-X-X-X'.colorLog('yellow')
+      '☠ ☠ ☠ ☠ ☠ ☠   PirateParser       ☠ ☠ ☠ ☠ ☠ ☠'.colorLog('yellow')
     );
   }
 
@@ -173,7 +173,7 @@ export default class PirateParser {
 
     // Начать парсинг
     console.log(
-      'X-X-X-X-X-X-X-X   Поднять паруса!    X-X-X-X-X-X-X-X'.colorLog('yellow')
+      '☠ ☠ ☠ ☠ ☠ ☠   Поднять паруса!    ☠ ☠ ☠ ☠ ☠ ☠'.colorLog('yellow')
     );
     this.#startTime = Date.now();
 
@@ -211,7 +211,7 @@ export default class PirateParser {
       } секунд`.colorLog('yellow')
     );
     console.log(
-      'X-X-X-X-X-X-X-X   Встать на якорь!   X-X-X-X-X-X-X-X'.colorLog('yellow')
+      '☠ ☠ ☠ ☠ ☠ ☠   Встать на якорь!   ☠ ☠ ☠ ☠ ☠ ☠'.colorLog('yellow')
     );
   }
 }
