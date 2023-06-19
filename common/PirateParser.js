@@ -1,4 +1,5 @@
 import { chromium, firefox, webkit } from 'playwright';
+import { useColorLogs } from './useColorLogs.js';
 
 /**
  * Класс парсера данных. Последовательность запуска:
@@ -8,6 +9,8 @@ import { chromium, firefox, webkit } from 'playwright';
  *  4. Запустить парсинг данных: await parser.parse()
  *
  */
+
+useColorLogs();
 
 export default class PirateParser {
   #stack = [];
@@ -65,7 +68,9 @@ export default class PirateParser {
     console.log('');
     console.log('');
     console.log('');
-    console.log('X-X-X-X-X-X-X-X   PirateParser       X-X-X-X-X-X-X-X');
+    console.log(
+      'X-X-X-X-X-X-X-X   PirateParser       X-X-X-X-X-X-X-X'.colorLog('yellow')
+    );
   }
 
   async #startStream() {
@@ -80,9 +85,11 @@ export default class PirateParser {
     while (this.#stack.length !== 0) {
       // Если значение предохранителя больше 15 отключить парсинг
       if (this.#fuse >= 15) {
-        console.log('PirateParser: КАЖЕТСЯ НАС ЗАБАНИЛИ!');
+        console.log('PirateParser: КАЖЕТСЯ НАС ЗАБАНИЛИ!'.colorLog('red'));
         console.log(
-          'Есть только один флаг, и он такой же черный, как наши сердца!'
+          'Есть только один флаг, и он такой же черный, как наши сердца!'.colorLog(
+            'white'
+          )
         );
         throw new PirateParserError('You are banned :(((');
       }
@@ -99,7 +106,7 @@ export default class PirateParser {
         // Увеличить предохранитель на единицу
         this.#fuse++;
         this.#errorStack.push(item);
-        console.log(`PirateParser: ${error.message}`);
+        console.log(`⚠ PirateParser: ${error.message}`.colorLog('red'));
       }
 
       // Обнулить предохранитель, парсинг ссылки прошел успешно
@@ -164,7 +171,9 @@ export default class PirateParser {
     }
 
     // Начать парсинг
-    console.log('X-X-X-X-X-X-X-X   Поднять паруса!    X-X-X-X-X-X-X-X');
+    console.log(
+      'X-X-X-X-X-X-X-X   Поднять паруса!    X-X-X-X-X-X-X-X'.colorLog('yellow')
+    );
     this.#startTime = Date.now();
 
     // Запустить потоки
@@ -200,7 +209,9 @@ export default class PirateParser {
         100
       } секунд`
     );
-    console.log('X-X-X-X-X-X-X-X   Встать на якорь!   X-X-X-X-X-X-X-X');
+    console.log(
+      'X-X-X-X-X-X-X-X   Встать на якорь!   X-X-X-X-X-X-X-X'.colorLog('yellow')
+    );
   }
 }
 
