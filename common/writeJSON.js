@@ -25,8 +25,6 @@ export async function writeJSON(name, dest, data) {
   try {
     dir = await fs.readdir(dest);
   } catch (error) {
-    console.log(`Директория ${dest} отсутствует`);
-    console.log(`Создание директории ${dest}`);
     await fs.mkdir(dest);
   }
 
@@ -36,7 +34,5 @@ export async function writeJSON(name, dest, data) {
     console.log(`Файл будет сохранен как ${fullName}`);
   }
 
-  console.log('Запись файла...');
   await fs.writeFile(path.join(dest, fullName), JSON.stringify(data));
-  console.log(`Файл ${fullName} успешно записан в ${dest}`);
 }
