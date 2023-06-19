@@ -27,6 +27,7 @@ export default class PirateParser {
   #headless;
   #delay;
   #fuse = 0;
+  #averageQueue;
 
   /**
    * Создать экземпляр парсера
@@ -64,6 +65,7 @@ export default class PirateParser {
     this.#streams = streams || 1;
     this.#headless = headless && true;
     this.#delay = delay || 0;
+    this.#averageQueue = new CurrentAverage(10);
 
     console.log('');
     console.log('');
@@ -112,18 +114,17 @@ export default class PirateParser {
       // Обнулить предохранитель, парсинг ссылки прошел успешно
       this.#fuse = 0;
 
-      // Выдать лог остатка если стек не пуст
+      // Обработать скорость парсинга и выдать лог остатка если стек не пуст
       if (this.#stack.length !== 0) {
+        // Добавить длительность в очередь
+        this.#averageQueue.push(Date.now() - startTime);
+        // Выдать лог
         console.log(
           `PirateParser: ссылок в очереди: ${
             this.#stack.length
-          }, примерно осталось минут: ${
-            Math.round(
-              ((Date.now() - startTime) * this.#stack.length) /
-                this.#streams /
-                6000
-            ) / 10
-          }`
+          }, примерно осталось времени: ${formatTime(
+            (this.#averageQueue.average() * this.#stack.length) / this.#streams
+          )}`
         );
       }
 
@@ -207,7 +208,7 @@ export default class PirateParser {
       `PirateParser: средняя скорость парсинга: ${
         Math.round((Date.now() - this.#startTime) / this.#stackLength / 10) /
         100
-      } секунд`
+      } секунд`.colorLog('yellow')
     );
     console.log(
       'X-X-X-X-X-X-X-X   Встать на якорь!   X-X-X-X-X-X-X-X'.colorLog('yellow')
