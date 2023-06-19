@@ -124,7 +124,7 @@ export default class PirateParser {
         console.log(
           `PirateParser: ссылок в очереди: ${
             this.#stack.length
-          }, примерно осталось времени: ${formatTime(
+          }, осталось времени: ${formatTime(
             (this.#averageQueue.average() * this.#stack.length) / this.#streams
           )}`
         );
