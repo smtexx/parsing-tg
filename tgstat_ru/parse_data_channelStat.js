@@ -1,9 +1,9 @@
+import * as path from 'path';
 import PirateParser from '../common/PirateParser.js';
 import { readJSON } from '../common/readJSON.js';
 import { writeJSON } from '../common/writeJSON.js';
 import { getRawFiles } from '../common/getRawFiles.js';
-import { parser_commonStat } from './parser_commonStat.js';
-import * as path from 'path';
+import { parser_commonStat } from './parsers/parser_data_channelStat.js';
 import { useColorLogs } from '../common/useColorLogs.js';
 
 /**
@@ -15,7 +15,7 @@ import { useColorLogs } from '../common/useColorLogs.js';
 useColorLogs();
 
 export async function parse() {
-  const sourceDest = path.join('parsed_data', 'telega_in', 'links_to_data');
+  const sourceDest = path.join('parsed_data', 'telega_in', 'links', 'channel');
   const readyDest = path.join('parsed_data', 'tgstat_ru', 'data');
 
   const rawFiles = await getRawFiles(sourceDest, readyDest);

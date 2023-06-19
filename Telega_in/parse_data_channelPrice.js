@@ -1,9 +1,9 @@
-import PirateParser from '../common/PirateParser.js';
-import { readJSON } from '../common/readJSON.js';
-import { writeJSON } from '../common/writeJSON.js';
-import { getRawFiles } from '../common/getRawFiles.js';
-import { parser_channelData } from './parser_channelData.js';
 import * as path from 'path';
+import PirateParser from '../../common/PirateParser.js';
+import { readJSON } from '../../common/readJSON.js';
+import { writeJSON } from './.../common/writeJSON.js';
+import { getRawFiles } from '../../common/getRawFiles.js';
+import { parser_channelData } from './parsers/parser_data_channelPrice.js';
 
 /**
  * Парсер извлекает данные телеграм каналов с telega.in
@@ -11,8 +11,8 @@ import * as path from 'path';
  *
  */
 
-async function parse() {
-  const sourceDest = path.join('parsed_data', 'telega_in', 'links_to_data');
+export async function parse_data_channelPrice() {
+  const sourceDest = path.join('parsed_data', 'telega_in', 'links', 'channel');
   const readyDest = path.join('parsed_data', 'telega_in', 'data');
 
   const rawFiles = await getRawFiles(sourceDest, readyDest);

@@ -1,4 +1,4 @@
-import { ParsingError } from '../common/ParsingError.js';
+import { ParsingError } from '../../common/ParsingError.js';
 
 /**
  * Парсер извлекает ссылки на телеграм каналы со страницы с каталогом
@@ -8,7 +8,7 @@ import { ParsingError } from '../common/ParsingError.js';
  * @param {import('playwright').Page} PAGE - объект страницы браузера с ПРОЙДЕННОЙ АВТОРИЗАЦИЕЙ из пакета playwright
  */
 
-export async function parser_cannelLinks(catalogPage, PAGE) {
+export async function parser_links_channel(catalogPage, PAGE) {
   console.log(`Переходим к ${catalogPage} для парсинга ссылок`);
   const response = await PAGE.goto(catalogPage);
 

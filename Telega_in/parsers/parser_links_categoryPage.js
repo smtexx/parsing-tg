@@ -1,5 +1,5 @@
 import { load } from 'cheerio';
-import { ParsingError } from '../common/ParsingError.js';
+import { ParsingError } from '../../common/ParsingError.js';
 
 /**
  * Парсер извлекает ссылки на страницы с каталогом
@@ -16,7 +16,7 @@ import { ParsingError } from '../common/ParsingError.js';
   link - ссылка на отфильтрованную по теме страницу
 */
 
-export async function parser_catalogPage(link, PAGE) {
+export async function parser_links_categoryPage(link, PAGE) {
   const URL = 'https://telega.in/catalog';
   const data = [];
 

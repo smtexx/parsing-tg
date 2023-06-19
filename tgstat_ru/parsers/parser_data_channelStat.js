@@ -1,11 +1,11 @@
 import { load } from 'cheerio';
-import { parseNumericValue } from '../common/parseNumericValue.js';
-import { ParsingError } from '../common/ParsingError.js';
+import { parseNumericValue } from '../../common/parseNumericValue.js';
+import { ParsingError } from '../../common/ParsingError.js';
 import {
   INJECTED_SELECTOR,
   INJECTED_SELECTOR_ATTRIBUTE,
   injectMarker,
-} from '../common/injectMarker.js';
+} from '../../common/injectMarker.js';
 
 /**
  * Парсер извлекает данные из https://tgstat.ru/channel/@${channelID}/stat.
@@ -43,9 +43,20 @@ import {
     subscribersReact - количество подписчиков, оставивших реакцию за 30 дней
     male_percent - процент мужчин среди подписчиков
     female_percent - процент женщин среди подписчиков
+    uniqMembersWeek - участников написавших минимум одно сообщение за неделю
+    uniqMembersDay - участников написавших минимум одно сообщение за день
+    uniqMembersMonth - участников написавших минимум одно сообщение за месяц
+    onlineNow - участники онлайн, сейчас
+    onlineDay - участники онлайн, прошлым днем
+    onlineNight - участники онлайн, прошлой ночью
+    totalMessages - всего сообщений в чате
+    messagesDay - сообщений за вчерашний день
+    messagesWeek - сообщений за неделю
+    messagesMonth - сообщений за месяц
+
 */
 
-export async function parser_commonStat(channelID, PAGE) {
+export async function parser_data_channelStat(channelID, PAGE) {
   const URL = `https://tgstat.ru/channel/@${channelID}/stat`;
   const data = { channelID };
 

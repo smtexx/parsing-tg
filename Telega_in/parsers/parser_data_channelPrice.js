@@ -1,5 +1,5 @@
 import { load } from 'cheerio';
-import { parseNumericValue } from '../common/parseNumericValue.js';
+import { parseNumericValue } from '../../common/parseNumericValue.js';
 
 /**
  * Парсер извлекает данные телеграм канала с его страницы на telega.in *
@@ -35,7 +35,7 @@ import { parseNumericValue } from '../common/parseNumericValue.js';
   postPerDay - среднее количество постов в день
 */
 
-export async function parser_channelData(link, PAGE) {
+export async function parser_data_channelPrice(link, PAGE) {
   const data = { link };
 
   console.log(`Открытие страницы канала ${link}`);
