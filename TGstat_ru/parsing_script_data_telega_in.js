@@ -4,6 +4,7 @@ import { writeJSON } from '../common/writeJSON.js';
 import { getRawFiles } from '../common/getRawFiles.js';
 import { parser_commonStat } from './parser_commonStat.js';
 import * as path from 'path';
+import { useColorLogs } from '../common/useColorLogs.js';
 
 /**
  * Парсер извлекает данные телеграм каналов с tgstat.ru
@@ -11,6 +12,7 @@ import * as path from 'path';
  * ЗАПУСКАТЬ ИЗ INDEX.JS !!!
  *
  */
+useColorLogs();
 
 export async function parse() {
   const sourceDest = path.join('parsed_data', 'telega_in', 'links_to_data');
@@ -24,7 +26,9 @@ export async function parse() {
     console.log('');
     console.log('');
     console.log(
-      `Файл: ${fileName} осталось файлов: ${rawFiles.length - 1 - i}`
+      `Обработка файла ${fileName}. Осталось файлов: ${
+        rawFiles.length - 1 - i
+      }`.colorLog('blue')
     );
     const links = await readJSON(fileName, sourceDest);
     const channelIDs = links.map(
@@ -42,7 +46,7 @@ export async function parse() {
       },
       streams: 1,
       headless: false,
-      delay: 2000,
+      delay: 500,
     });
 
     PARSER.fillStack(channelIDs);
