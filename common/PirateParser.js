@@ -224,3 +224,53 @@ class PirateParserError extends Error {
 
 // В конфиге добавить возможность паузы и отключения безголового режима
 // Добавить очередь ошибок отключающую парсинг при превышении количества запросов
+
+class CurrentAverage {
+  #queue = [];
+  #queueLength;
+
+  constructor(queueLength) {
+    if (!queueLength || typeof queueLength !== 'number') {
+      throw new Error('Argument queueLength is missing or has wrong type');
+    }
+
+    this.#queueLength = queueLength;
+  }
+
+  push(value) {
+    if (typeof value !== 'number') {
+      throw new Error('Type of pushed value is not a number');
+    }
+
+    if (this.#queue.length === this.#queueLength) {
+      this.#queue.shift();
+    }
+
+    this.#queue.push(value);
+  }
+
+  clear() {
+    this.#queue = [];
+  }
+
+  average() {
+    if (this.#queue.length === 0) {
+      return 0;
+    }
+
+    return this.#queue.reduce((sum, val) => sum + val, 0) / this.#queue.length;
+  }
+}
+
+function formatTime(ms) {
+  const totalSeconds = Math.round(ms / 1000);
+  const time = [
+    Math.floor(totalSeconds / 3600),
+    Math.floor((totalSeconds % 3600) / 60),
+    totalSeconds % 60,
+  ]
+    .map((part) => part.toString())
+    .map((part) => (part.length === 1 ? `0${part}` : part));
+
+  return time.join(':');
+}
