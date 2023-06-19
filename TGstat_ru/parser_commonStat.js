@@ -57,9 +57,11 @@ export async function parser_commonStat(channelID, PAGE) {
   const CHAT = 'chat';
   const CHANNEL = 'channel';
   const NOT_FOUND = 'not_found';
+  const BANNED = 'banned';
   const markers = [
     // Страница содержит контент для парсинга
     { selector: '.modal.show', text: 'Канал не найден', value: NOT_FOUND },
+    { selector: '.modal.show', text: 'Доступ ограничен', value: BANNED },
     { selector: '.card.card-body h5', text: 'Гео и язык чата', value: CHAT },
     {
       selector: '.card.card-body h5',
@@ -75,7 +77,10 @@ export async function parser_commonStat(channelID, PAGE) {
 
   // Если канала не найден выбрасываем исключение
   if (marker === NOT_FOUND) {
-    throw new ParsingError(`!!!!! Канал @${channelID} не найден на TGstat.ru`);
+    throw new ParsingError(`Канал @${channelID} не найден на TGstat.ru`);
+  }
+  if (marker === BANNED) {
+    throw new ParsingError(`Канал @${channelID} забанен на TGstat.ru`);
   }
 
   const baseSelector = '.card.card-body';
