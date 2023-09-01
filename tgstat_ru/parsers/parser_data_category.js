@@ -24,8 +24,8 @@ import { parseNumericValue } from '../../common/parseNumericValue.js';
         subscribers - количество участноиков
 */
 
-export async function parser_data_category(link, PAGE) {
-  const data = { id: link.replace('https://tgstat.ru/', '') };
+export async function parser_data_category(categoryID, PAGE) {
+  const data = { id: categoryID };
 
   async function waitForShowMore() {
     await PAGE.waitForFunction(
@@ -43,7 +43,10 @@ export async function parser_data_category(link, PAGE) {
     );
   }
   async function openHiddenCarts() {
+    let opened = (await PAGE.locator('.card.card-body.peer-item-box').all())
+      .length;
     while (true) {
+      await PAGE.waitForTimeout(3000);
       // Дождаться наличия кнопки "Показать больше"
       await waitForShowMore();
       // Получить локатор кнопки
@@ -53,16 +56,16 @@ export async function parser_data_category(link, PAGE) {
         (button) => button.offsetParent !== null
       );
       if (isEnabled) {
-        console.log('Открытие карт...');
-        await buttonLocator.click();
+        console.log(`Открыто кароточек: ${opened}`);
+        await buttonLocator.click({ timeout: 120_000 });
       } else {
         break;
       }
-      await PAGE.waitForTimeout(3000);
+      opened += 102;
     }
   }
 
-  await PAGE.goto(link);
+  await PAGE.goto(`https://tgstat.ru/${categoryID}`);
 
   // Парсинг карточек каналов
   console.log('Открываем каналы');
@@ -96,8 +99,12 @@ export async function parser_data_category(link, PAGE) {
   data.channels = channels;
 
   // Парсинг карточек чатов
-  await PAGE.getByText('Все чаты').click();
   console.log('Открываем чаты');
+  const switchToChats = PAGE.locator('label.form-filter-js', {
+    hasText: 'Все чаты',
+  });
+  await switchToChats.waitFor({ state: 'attached' });
+  await switchToChats.click({ timeout: 120_000 });
   await openHiddenCarts();
   // Данные чатов
   $ = load(await PAGE.content());
@@ -128,3 +135,5 @@ export async function parser_data_category(link, PAGE) {
 
   return data;
 }
+
+// Парсить время последнего сообщения с карточек!!!

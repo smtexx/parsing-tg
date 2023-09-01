@@ -10,7 +10,7 @@ import * as path from 'path';
  *
  */
 
-export async function parsing_script_topics() {
+export async function parse_links_categoryPage() {
   const readyDest = path.join('parsed_data', 'tgstat_ru', 'links');
 
   const PARSER = new PirateParser({

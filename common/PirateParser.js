@@ -63,9 +63,14 @@ export default class PirateParser {
     this.#authFn = authFn;
     this.#errorHandleFn = errorHandleFn;
     this.#streams = streams || 1;
-    this.#headless = headless && true;
     this.#delay = delay || 0;
     this.#averageQueue = new CurrentAverage(15);
+
+    if (typeof headless === 'boolean') {
+      this.#headless = headless;
+    } else {
+      this.#headless = true;
+    }
 
     console.log('');
     console.log('');

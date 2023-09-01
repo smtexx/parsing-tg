@@ -14,9 +14,9 @@ import { useColorLogs } from '../common/useColorLogs.js';
  */
 useColorLogs();
 
-export async function parse() {
+export async function parse_data_channelStat() {
   const sourceDest = path.join('parsed_data', 'telega_in', 'links', 'channel');
-  const readyDest = path.join('parsed_data', 'tgstat_ru', 'data');
+  const readyDest = path.join('parsed_data', 'tgstat_ru', 'data', 'channels');
 
   const rawFiles = await getRawFiles(sourceDest, readyDest);
 
